@@ -70,8 +70,8 @@ int main(int argc, char *argv[])
     int eth_len = sizeof(*eth_h);
 
     struct in_addr my_ip;
-    struct in_addr gateway_ip;
     struct in_addr victim_ip;
+    struct in_addr gateway_ip;
 
     char tmpIP[16];
     char tmppacket[42];
@@ -104,38 +104,39 @@ int main(int argc, char *argv[])
     printf("victim IP  -> %s\n", tmpIP);
     memset(tmpIP, 0, sizeof(inet_ntoa(victim_ip)));
 
-    sprintf(tmpIP, "%s", inet_ntoa(gateway_ip));
-    printf("gateway IP  -> %s\n", tmpIP);
-    
     uint8_t broadcast[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
 
-    make_arp_packet(mymac, my_ip.s_addr, broadcast, gateway_ip.s_addr, ARP_REQUEST, 0);
+    make_arp_packet(mymac, my_ip.s_addr, broadcast, victim_ip.s_addr, ARP_REQUEST, 0);
+	/*
     if (pcap_sendpacket(handle, (u_char *)tmp, PACKET_SIZE) != 0)
     {
         fprintf(stderr,"\nError sending the packet: %s\n", pcap_geterr(handle));
         return -1;
     }
-    
-    if((handle = pcap_open_live(argv[1], 2048, 1, 1024, errbuf)) == NULL){
-        printf("[!] Device open Error!!!\n");
-        perror(errbuf);
-        exit(0);;
-    }
+    */
     while(1){
         res = pcap_next_ex(handle, &header, &packet);
-        if (res == 0 || packet == NULL)
+        if (res == 0 || packet == NULL){
+			if (pcap_sendpacket(handle, (u_char *)tmp, PACKET_SIZE) != 0){
+				fprintf(stderr,"\nError sending the packet: %s\n", pcap_geterr(handle));
+				return -1;
+			}
+			sleep(1);
             continue;
+		}
         if (res == -1 || res == -2){
             printf("[!] EXIT process\n");
             break;
         }
 
         eth_h = (libnet_ethernet_hdr *) packet;
-        arp_h = (arphdr_t *) (packet+eth_len);
         if (ntohs(eth_h->ether_type) == ETHERTYPE_ARP){
-            if (memcmp(eth_h->ether_dhost, mymac, 6) == 0){
+			arp_h = (arphdr_t *) (packet+eth_len);
+            if ( memcmp(&victim_ip.s_addr, arp_h->spa, 4) == 0){
                 hexdump(packet, 42);
-                memcpy(victim_mac, eth_h->ether_shost, 6);
+                memcpy(victim_mac, arp_h->sha, 6);
+				for(i=0; i<6;i++)
+					printf("%02X%s", victim_mac[i], (i==5 ? "\n" : ":"));
                 break;
             }
         }
