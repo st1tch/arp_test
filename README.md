@@ -22,9 +22,14 @@ arp infection packet 구성에 필요한 sender mac 정보는 프로그램 레�
 ```
 </br>
 
+## RESULT
+- Wireshark capture
+![1](https://github.com/st1tch/arp_test/blob/master/result.png)
+</br>
+
 ## ARP headers
 - ARP header
-![1](https://github.com/st1tch/arp_test/blob/master/arp_header.png)
+![2](https://github.com/st1tch/arp_test/blob/master/arp_header.png)
 </br>
 
 ## Reference
