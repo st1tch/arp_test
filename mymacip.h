@@ -1,19 +1,19 @@
 
 void get_mac(char *dev, uint8_t chMAC[6]){
-	struct ifreq ifr;
-	int sock;
+    struct ifreq ifr;
+    int sock;
 
-	sock=socket(AF_INET,SOCK_DGRAM, IPPROTO_IP);
-	ifr.ifr_addr.sa_family = AF_INET;
-	strcpy(ifr.ifr_name, dev );
+    sock=socket(AF_INET,SOCK_DGRAM, IPPROTO_IP);
+    ifr.ifr_addr.sa_family = AF_INET;
+    strcpy(ifr.ifr_name, dev );
 
-	if (ioctl( sock, SIOCGIFHWADDR, &ifr ) != 0) {
-		printf("Error!\n");
-		exit(2);
-	}
-	close(sock);
+    if (ioctl( sock, SIOCGIFHWADDR, &ifr ) != 0) {
+        printf("Error!\n");
+        exit(2);
+    }
+    close(sock);
 
-	memcpy(chMAC, ifr.ifr_hwaddr.sa_data, 6);
+    memcpy(chMAC, ifr.ifr_hwaddr.sa_data, 6);
 }
 
 struct in_addr get_ip(char *dev){
